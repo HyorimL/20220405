@@ -1,5 +1,9 @@
 package co.micol.prj.member.web;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +16,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import co.micol.prj.member.service.MemberService;
 import co.micol.prj.member.vo.MemberVO;
+import co.micol.prj.util.PasswordEncypt;
 
 @Controller
 public class MemberController {
 
 	@Autowired
 	private MemberService memberDao;
+	
+	@Autowired
+	private PasswordEncypt pEncrypt;
 	
 	@RequestMapping("/memberSelectList.do")
 	public String memberSelectList(Model model) {
@@ -32,6 +40,7 @@ public class MemberController {
 	
 	@PostMapping("/memberJoin.do")
 	public String memberJoin(MemberVO vo) {
+		vo.setPassword(pEncrypt.pe(vo.getPassword()));
 		memberDao.memberInsert(vo);
 		return "redirect:memberSelectList.do"; //직접 실행 구문을 호출할 때 
 	}
@@ -43,6 +52,7 @@ public class MemberController {
 	
 	@PostMapping("/memberLogin.do")
 	public String memberLogin(MemberVO vo, Model model, HttpSession session) {
+		vo.setPassword(passwordEncrypt(vo.getPassword()));
 		vo = memberDao.memberSelect(vo);
 		if(vo != null) {
 			session.setAttribute("id", vo.getId());
@@ -55,6 +65,22 @@ public class MemberController {
 		return "member/memberLoginMessage";
 	}
 	
+	private String passwordEncrypt(String password) {
+		// TODO Auto-generated method stub
+		MessageDigest md;
+		String enc = null;
+		try {
+			md = MessageDigest.getInstance("SHA-256");
+			md.update(password.getBytes());
+			enc = String.format("%064x", new BigInteger(1, md.digest()));
+			System.out.println(enc);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		
+		return enc;
+	}
+
 	@RequestMapping("/memberLogout.do")
 	public String memberLogout(HttpSession session, Model model) {
 		session.invalidate();
@@ -74,4 +100,5 @@ public class MemberController {
 		}
 		return str;
 	}
+	
 }

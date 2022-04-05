@@ -14,6 +14,7 @@
 	<a href="memberSelectList.do">member list</a><br>
 	<a href="memberLoginForm.do">LOGIN</a><br>
 	<a href="memberJoinForm.do">JOIN</a><br>
+	<a href="passwordEncrypt.do">패스워드 암호화</a>
 </div>
 </body>
 </html>
